@@ -33,7 +33,7 @@ internal sealed class QuizState {
      * @property questions Список всех вопросов викторины
      * @property passedQuestions Список уже пройденных вопросов
      */
-    data class Success(
+    data class Quiz(
         val questions: List<QuizQuestion> = listOf(),
         val passedQuestions: List<QuizQuestion> = listOf(),
     ) : QuizState()

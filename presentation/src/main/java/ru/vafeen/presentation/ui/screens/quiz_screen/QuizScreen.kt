@@ -15,6 +15,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -39,47 +40,68 @@ internal fun QuizScreen(
 ) {
     val state by viewModel.state.collectAsState()
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.primary
+        modifier = Modifier.fillMaxSize(), containerColor = MaterialTheme.colorScheme.primary
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .padding(paddingValues)
+                .padding(horizontal = 26.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                if (state is QuizState.Start ||
-                    state is QuizState.Error
+            if (state !is QuizState.Quiz) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Button(onClick = {
-                        viewModel.handleIntent(QuizIntent.NavigateToHistory)
-                    }, colors = ButtonDefaults.buttonColors(containerColor = Color.White)) {
-                        Text(
-                            stringResource(R.string.history),
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Icon(
-                            modifier = Modifier.size(16.dp),
-                            painter = painterResource(R.drawable.history),
-                            contentDescription = stringResource(R.string.history),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
+                    if (state is QuizState.Start || state is QuizState.Error) {
+                        Button(onClick = {
+                            viewModel.handleIntent(QuizIntent.NavigateToHistory)
+                        }, colors = ButtonDefaults.buttonColors(containerColor = Color.White)) {
+                            Text(
+                                stringResource(R.string.history),
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Icon(
+                                modifier = Modifier.size(16.dp),
+                                painter = painterResource(R.drawable.history),
+                                contentDescription = stringResource(R.string.history),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
             }
-            if (state is QuizState.Start ||
-                state is QuizState.Error ||
-                state is QuizState.Loading
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 15.dp),
+                contentAlignment = Alignment.Center
             ) {
+                if (state is QuizState.Quiz) {
+                    IconButton(
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .size(24.dp),
+                        onClick = { viewModel.handleIntent(QuizIntent.ReturnToBeginning) }) {
+                        Icon(
+                            painter = painterResource(R.drawable.arrow_back),
+                            contentDescription = stringResource(R.string.back)
+                        )
+                    }
+                }
                 Icon(
+                    modifier = Modifier
+                        .size(
+                            width = if (state is QuizState.Quiz) 180.dp
+                            else 300.dp,
+                            height = if (state is QuizState.Quiz) 40.dp
+                            else 68.dp
+                        ),
                     painter = painterResource(R.drawable.daily_quiz),
                     contentDescription = stringResource(R.string.daily_quiz)
                 )
@@ -102,8 +124,7 @@ internal fun QuizScreen(
 @Composable
 private fun LoadingQuiz() {
     Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(121.dp))
         RadialGradientLoader()
@@ -114,7 +135,8 @@ private fun LoadingQuiz() {
 private fun Error() {
     Text(
         modifier = Modifier.padding(top = 24.dp),
-        text = stringResource(R.string.error_try_again), fontSize = 20.sp,
+        text = stringResource(R.string.error_try_again),
+        fontSize = 20.sp,
         color = Color.White
     )
 }

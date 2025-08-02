@@ -5,4 +5,5 @@
     <string name="start_the_quiz">Начать викторину</string>
     <string name="history">История</string>
     <string name="error_try_again">Ошибка! Попробуйте ещё раз</string>
+    <string name="back">back</string>
 </resources>

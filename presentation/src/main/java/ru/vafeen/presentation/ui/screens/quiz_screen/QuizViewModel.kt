@@ -9,10 +9,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ru.vafeen.domain.models.QuizQuestion
+import ru.vafeen.domain.network.ResponseResult
+import ru.vafeen.domain.network.usecase.GetQuizUseCase
 import javax.inject.Inject
 
 @HiltViewModel
-internal class QuizViewModel @Inject constructor() : ViewModel() {
+internal class QuizViewModel @Inject constructor(
+    private val getQuizUseCase: GetQuizUseCase,
+) : ViewModel() {
     private val _state = MutableStateFlow<QuizState>(QuizState.Start)
     val state = _state.asStateFlow()
     fun handleIntent(intent: QuizIntent) {
@@ -20,8 +25,13 @@ internal class QuizViewModel @Inject constructor() : ViewModel() {
             when (intent) {
                 QuizIntent.BeginQuiz -> beginQuiz()
                 QuizIntent.NavigateToHistory -> navigateToHistory()
+                QuizIntent.ReturnToBeginning -> returnToBeginning()
             }
         }
+    }
+
+    private fun returnToBeginning() {
+        _state.update { QuizState.Start }
     }
 
     private fun navigateToHistory() {
@@ -31,6 +41,12 @@ internal class QuizViewModel @Inject constructor() : ViewModel() {
     private suspend fun beginQuiz() {
         _state.update { QuizState.Loading }
         delay(2000)
-        _state.update { QuizState.Error }
+        when (val quizzes = getQuizUseCase.invoke()) {
+            is ResponseResult.Success<List<QuizQuestion>> -> _state.update {
+                QuizState.Quiz(questions = quizzes.data)
+            }
+
+            is ResponseResult.Error -> _state.update { QuizState.Error }
+        }
     }
 }

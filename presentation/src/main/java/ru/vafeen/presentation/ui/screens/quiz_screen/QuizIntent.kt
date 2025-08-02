@@ -18,4 +18,6 @@ internal sealed class QuizIntent {
      * Отправляется при нажатии на кнопку перехода к истории викторин.
      */
     data object NavigateToHistory : QuizIntent()
+
+    data object ReturnToBeginning : QuizIntent()
 }
