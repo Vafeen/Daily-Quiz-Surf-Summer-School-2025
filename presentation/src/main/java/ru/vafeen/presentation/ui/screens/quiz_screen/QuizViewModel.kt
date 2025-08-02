@@ -38,7 +38,7 @@ internal class QuizViewModel @Inject constructor(
                 QuizIntent.ReturnToBeginning -> returnToBeginning()
                 is QuizIntent.ChoseAnswer -> choseAnswer(intent.answer)
                 QuizIntent.ConfirmChosenAnswer -> confirmAnswer()
-                QuizIntent.TryAgain -> beginQuiz()
+                QuizIntent.TryAgain -> tryAgain()
             }
         }
     }
@@ -110,6 +110,13 @@ internal class QuizViewModel @Inject constructor(
      */
     private fun navigateToHistory() {
         // TODO: добавить навигацию к истории
+    }
+
+    /**
+     *  Возвращает состояние викторины к начальному состоянию.
+     */
+    private fun tryAgain() {
+        _state.update { QuizState.Start }
     }
 
     /**
