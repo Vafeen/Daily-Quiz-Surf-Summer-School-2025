@@ -8,7 +8,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ru.vafeen.domain.local_database.usecase.SaveQuizSessionResultUseCase
 import ru.vafeen.domain.models.QuizQuestion
+import ru.vafeen.domain.models.QuizResult
 import ru.vafeen.domain.network.ResponseResult
 import ru.vafeen.domain.network.usecase.GetQuizUseCase
 import javax.inject.Inject
@@ -21,6 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 internal class QuizViewModel @Inject constructor(
     private val getQuizUseCase: GetQuizUseCase,
+    private val saveQuizSessionResultUseCase: SaveQuizSessionResultUseCase,
 ) : ViewModel() {
     private val _state = MutableStateFlow<QuizState>(QuizState.Start)
     val state = _state.asStateFlow()
@@ -47,7 +50,7 @@ internal class QuizViewModel @Inject constructor(
      * Подтверждает выбранный ответ, обновляет состояние текущего вопроса либо переходит к следующему,
      * а по окончании викторины вычисляет результат и переходит в состояние результата.
      */
-    private fun confirmAnswer() {
+    private suspend fun confirmAnswer() {
         val state = _state.value
         if (state is QuizState.Quiz) {
             val currentQuestion = state.currentQuestion
@@ -68,17 +71,19 @@ internal class QuizViewModel @Inject constructor(
                     )
                     _state.update { newStateWithNewQuestionsAndAnswer }
                     if (newCurrentQuestion == null) {
-                        val countOfRightQuestions = newStateWithNewQuestionsAndAnswer
+                        val countOfRightAnswers = newStateWithNewQuestionsAndAnswer
                             .passedQuestions
                             .count { question -> question.chosenAnswer == question.correctAnswer }
 
-                        // TODO: Реализовать сохранение результатов викторины
-
                         _state.update {
                             QuizState.Result(
-                                quizResult = QuizResult.getByCount(countOfRightQuestions)
+                                quizResult = QuizResult.getByCount(countOfRightAnswers)
                             )
                         }
+                        saveQuizSessionResultUseCase.invoke(
+                            countOfRightAnswers,
+                            questions = newStateWithNewQuestionsAndAnswer.passedQuestions
+                        )
                     }
                 }
             }

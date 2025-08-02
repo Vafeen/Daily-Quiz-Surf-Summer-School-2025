@@ -128,6 +128,9 @@ internal fun QuizScreen(
                 }
 
                 is QuizState.Error -> {
+                    Welcome {
+                        viewModel.handleIntent(QuizIntent.BeginQuiz)
+                    }
                     Error()
                 }
 

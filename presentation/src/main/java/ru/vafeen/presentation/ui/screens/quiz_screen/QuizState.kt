@@ -1,6 +1,7 @@
 package ru.vafeen.presentation.ui.screens.quiz_screen
 
 import ru.vafeen.domain.models.QuizQuestion
+import ru.vafeen.domain.models.QuizResult
 
 /**
  * Состояния экрана викторины.

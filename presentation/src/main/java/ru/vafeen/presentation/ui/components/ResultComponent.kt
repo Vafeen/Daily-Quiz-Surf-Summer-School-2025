@@ -21,9 +21,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ru.vafeen.domain.models.QuizResult
 import ru.vafeen.domain.network.repository.QuizNetworkRepository
 import ru.vafeen.presentation.R
-import ru.vafeen.presentation.ui.screens.quiz_screen.QuizResult
 import ru.vafeen.presentation.ui.screens.quiz_screen.QuizState
 import ru.vafeen.presentation.ui.theme.StarTextColor
 
