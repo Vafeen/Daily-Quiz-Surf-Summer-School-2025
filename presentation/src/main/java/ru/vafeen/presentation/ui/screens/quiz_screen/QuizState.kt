@@ -34,7 +34,13 @@ internal sealed class QuizState {
      * @property passedQuestions Список уже пройденных вопросов
      */
     data class Quiz(
+        val chosenAnswer: String? = null,
+        val currentQuestion: QuizQuestion? = null,
         val questions: List<QuizQuestion> = listOf(),
         val passedQuestions: List<QuizQuestion> = listOf(),
+    ) : QuizState()
+
+    data class Result(
+        val quizResult: QuizResult
     ) : QuizState()
 }

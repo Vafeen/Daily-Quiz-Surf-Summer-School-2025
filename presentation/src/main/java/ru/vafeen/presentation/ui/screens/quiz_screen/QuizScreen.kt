@@ -1,6 +1,6 @@
 package ru.vafeen.presentation.ui.screens.quiz_screen
 
-import RadialGradientLoader
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,10 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,12 +25,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.vafeen.presentation.R
-import ru.vafeen.presentation.ui.components.RounderCornerButton
+import ru.vafeen.presentation.ui.components.Error
+import ru.vafeen.presentation.ui.components.LoadingQuiz
+import ru.vafeen.presentation.ui.components.Question
+import ru.vafeen.presentation.ui.components.ResultComponent
+import ru.vafeen.presentation.ui.components.Welcome
 
 @Composable
 internal fun QuizScreen(
@@ -49,7 +51,7 @@ internal fun QuizScreen(
                 .padding(horizontal = 26.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (state !is QuizState.Quiz) {
+            if (state !is QuizState.Quiz && state !is QuizState.Result) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -76,35 +78,38 @@ internal fun QuizScreen(
                     }
                 }
             }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 15.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                if (state is QuizState.Quiz) {
-                    IconButton(
-                        modifier = Modifier
-                            .align(Alignment.CenterStart)
-                            .size(24.dp),
-                        onClick = { viewModel.handleIntent(QuizIntent.ReturnToBeginning) }) {
-                        Icon(
-                            painter = painterResource(R.drawable.arrow_back),
-                            contentDescription = stringResource(R.string.back)
-                        )
-                    }
-                }
-                Icon(
+            if (state !is QuizState.Result) {
+                Box(
                     modifier = Modifier
-                        .size(
-                            width = if (state is QuizState.Quiz) 180.dp
-                            else 300.dp,
-                            height = if (state is QuizState.Quiz) 40.dp
-                            else 68.dp
-                        ),
-                    painter = painterResource(R.drawable.daily_quiz),
-                    contentDescription = stringResource(R.string.daily_quiz)
-                )
+                        .fillMaxWidth()
+                        .padding(top = 15.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (state is QuizState.Quiz) {
+                        IconButton(
+                            modifier = Modifier
+                                .align(Alignment.CenterStart)
+                                .size(24.dp),
+                            onClick = { viewModel.handleIntent(QuizIntent.ReturnToBeginning) }) {
+                            Icon(
+                                painter = painterResource(R.drawable.arrow_back),
+                                contentDescription = stringResource(R.string.back)
+                            )
+                        }
+                    }
+                    Image(
+                        modifier = Modifier
+                            .size(
+                                width = if (state is QuizState.Quiz) 180.dp
+                                else 300.dp,
+                                height = if (state is QuizState.Quiz) 40.dp
+                                else 68.dp
+                            ),
+                        painter = painterResource(R.drawable.daily_quiz),
+                        contentDescription = stringResource(R.string.daily_quiz)
+                    )
+
+                }
             }
             if (state is QuizState.Error || state is QuizState.Start) {
                 Welcome {
@@ -117,52 +122,36 @@ internal fun QuizScreen(
             if (state is QuizState.Loading) {
                 LoadingQuiz()
             }
-        }
-    }
-}
-
-@Composable
-private fun LoadingQuiz() {
-    Column(
-        modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.height(121.dp))
-        RadialGradientLoader()
-    }
-}
-
-@Composable
-private fun Error() {
-    Text(
-        modifier = Modifier.padding(top = 24.dp),
-        text = stringResource(R.string.error_try_again),
-        fontSize = 20.sp,
-        color = Color.White
-    )
-}
-
-@Composable
-private fun Welcome(onBegin: () -> Unit) {
-    Column(modifier = Modifier.padding(top = 40.dp)) {
-        Card(shape = RoundedCornerShape(46.dp)) {
-            Column(
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            if (state is QuizState.Quiz) {
+                Spacer(modifier = Modifier.height(40.dp))
+                Question(
+                    state = state as QuizState.Quiz, chooseAnswer = { answer ->
+                        viewModel.handleIntent(QuizIntent.ChoseAnswer(answer))
+                    }, confirmAnswer = {
+                        viewModel.handleIntent(QuizIntent.ConfirmChosenAnswer)
+                    })
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = stringResource(R.string.welcome_to_dailyquiz),
-                    fontSize = 28.sp,
-                    textAlign = TextAlign.Center
+                    text = stringResource(R.string.cant_return_to_previous_questions),
+                    color = Color.White,
+                    fontSize = 10.sp
+                )
+            }
+            if (state is QuizState.Result) {
+                Spacer(modifier = Modifier.height(32.dp))
+                Text(
+                    text = stringResource(R.string.results),
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(40.dp))
-                RounderCornerButton(onClick = onBegin) {
-                    Text(
-                        stringResource(R.string.start_the_quiz).uppercase(),
-                        fontSize = 16.sp,
-                        color = Color.White
-                    )
-                }
+                ResultComponent(state as QuizState.Result, onTryAgainClick = {
+                    viewModel.handleIntent(QuizIntent.TryAgain)
+                })
             }
         }
     }
 }
+
+
+

@@ -20,4 +20,7 @@ internal sealed class QuizIntent {
     data object NavigateToHistory : QuizIntent()
 
     data object ReturnToBeginning : QuizIntent()
+    data class ChoseAnswer(val answer: String) : QuizIntent()
+    data object ConfirmChosenAnswer : QuizIntent()
+    data object TryAgain : QuizIntent()
 }

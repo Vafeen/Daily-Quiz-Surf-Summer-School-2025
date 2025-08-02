@@ -14,5 +14,6 @@ data class QuizQuestion(
     val category: String,
     val difficulty: String,
     val correctAnswer: String,
-    val allAnswers: List<String>
+    val allAnswers: List<String>,
+    val chosenAnswer: String? = null,
 )
