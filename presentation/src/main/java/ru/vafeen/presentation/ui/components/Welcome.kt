@@ -18,7 +18,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.vafeen.presentation.R
 
-
+/**
+ * Компонент приветственного экрана с кнопкой начала викторины.
+ *
+ * Отображает карточку с заголовком и кнопкой "Начать квиз".
+ *
+ * @param onBegin Лямбда, вызываемая при нажатии кнопки запуска викторины.
+ */
 @Composable
 internal fun Welcome(onBegin: () -> Unit) {
     Column(modifier = Modifier.padding(top = 40.dp)) {
@@ -37,7 +43,7 @@ internal fun Welcome(onBegin: () -> Unit) {
                 Spacer(modifier = Modifier.height(40.dp))
                 RounderCornerButton(onClick = onBegin) {
                     Text(
-                        stringResource(R.string.start_the_quiz).uppercase(),
+                        text = stringResource(R.string.start_the_quiz).uppercase(),
                         fontSize = 16.sp,
                         color = Color.White
                     )

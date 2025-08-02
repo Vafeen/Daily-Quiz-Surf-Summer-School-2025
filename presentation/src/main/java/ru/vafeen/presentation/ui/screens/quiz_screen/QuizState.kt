@@ -13,33 +13,40 @@ internal sealed class QuizState {
      * Начальное состояние экрана перед стартом викторины.
      * Отображает стартовый экран с кнопкой начала.
      */
-    data object Start : QuizState()
+    object Start : QuizState()
 
     /**
      * Состояние загрузки данных викторины.
      * Отображает индикатор загрузки.
      */
-    data object Loading : QuizState()
+    object Loading : QuizState()
 
     /**
      * Состояние ошибки при загрузке викторины.
      * Отображает сообщение об ошибке и возможность повторить загрузку.
      */
-    data object Error : QuizState()
+    object Error : QuizState()
 
     /**
-     * Успешное состояние с загруженными вопросами викторины.
+     * Состояние, при котором викторина активна с доступными вопросами.
      *
-     * @property questions Список всех вопросов викторины
-     * @property passedQuestions Список уже пройденных вопросов
+     * @property chosenAnswer Выбранный ответ пользователем для текущего вопроса (или null, если не выбран).
+     * @property currentQuestion Текущий вопрос для отображения.
+     * @property questions Список оставшихся вопросов для прохождения.
+     * @property passedQuestions Список уже пройденных вопросов с выбранными ответами.
      */
     data class Quiz(
         val chosenAnswer: String? = null,
         val currentQuestion: QuizQuestion? = null,
-        val questions: List<QuizQuestion> = listOf(),
-        val passedQuestions: List<QuizQuestion> = listOf(),
+        val questions: List<QuizQuestion> = emptyList(),
+        val passedQuestions: List<QuizQuestion> = emptyList(),
     ) : QuizState()
 
+    /**
+     * Состояние результата викторины, отображаемое после прохождения всех вопросов.
+     *
+     * @property quizResult Итоговый результат викторины.
+     */
     data class Result(
         val quizResult: QuizResult
     ) : QuizState()

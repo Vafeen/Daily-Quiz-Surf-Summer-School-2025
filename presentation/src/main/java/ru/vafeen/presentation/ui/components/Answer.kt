@@ -19,10 +19,22 @@ import androidx.compose.ui.unit.sp
 import ru.vafeen.presentation.AnswerState
 import ru.vafeen.presentation.R
 
+/**
+ * Компонент отдельного варианта ответа в вопросе викторины.
+ *
+ * Отображает карточку с иконкой, отражающей состояние ответа, и текстом варианта.
+ * Карточка кликабельна, если передан обработчик нажатия [onClick].
+ *
+ * @param modifier Модификатор для дополнительного оформления компонента.
+ * @param text Текст варианта ответа.
+ * @param answerState Текущее состояние варианта ответа (свободен, выбран, правильный, неправильный).
+ * @param onClick Обработчик клика по варианту ответа, либо null если клик не активен.
+ */
 @Composable
 internal fun Answer(
     modifier: Modifier = Modifier,
-    text: String, answerState: AnswerState,
+    text: String,
+    answerState: AnswerState,
     onClick: (() -> Unit)? = null
 ) {
     Card(
@@ -43,8 +55,10 @@ internal fun Answer(
                 contentDescription = stringResource(R.string.answer_state)
             )
             Spacer(modifier = Modifier.width(16.dp))
-            Text(text = text, fontSize = 14.sp)
+            Text(
+                text = text,
+                fontSize = 14.sp
+            )
         }
     }
 }
-

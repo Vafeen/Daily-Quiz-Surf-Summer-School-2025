@@ -1,5 +1,10 @@
 package ru.vafeen.presentation.ui.screens.quiz_screen
 
+/**
+ * Перечисление итоговых результатов викторины в зависимости от количества правильных ответов.
+ *
+ * @property correctAnswers Количество правильных ответов (0..5).
+ */
 internal enum class QuizResult(val correctAnswers: Int) {
     Score0Of5(0),
     Score1Of5(1),
@@ -12,10 +17,11 @@ internal enum class QuizResult(val correctAnswers: Int) {
         /**
          * Возвращает элемент [QuizResult], соответствующий количеству правильных ответов [count].
          * Если не найдено подходящего значения, возвращает [Score0Of5].
+         *
+         * @param count Количество правильных ответов.
+         * @return Соответствующий результат квиза.
          */
         fun getByCount(count: Int): QuizResult =
-            entries.firstOrNull { it.correctAnswers == count }
-                ?: Score0Of5  // fallback
+            values().firstOrNull { it.correctAnswers == count } ?: Score0Of5
     }
 }
-

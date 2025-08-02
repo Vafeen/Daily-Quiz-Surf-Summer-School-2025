@@ -27,6 +27,13 @@ import ru.vafeen.presentation.ui.screens.quiz_screen.QuizResult
 import ru.vafeen.presentation.ui.screens.quiz_screen.QuizState
 import ru.vafeen.presentation.ui.theme.StarTextColor
 
+/**
+ * Компонент отображения результата викторины с рейтингом, количеством правильных ответов,
+ * описанием и кнопкой повторного запуска викторины.
+ *
+ * @param state Текущее состояние результата викторины.
+ * @param onTryAgainClick Лямбда, вызываемая при нажатии кнопки "Попробовать снова".
+ */
 @Composable
 internal fun ResultComponent(state: QuizState.Result, onTryAgainClick: () -> Unit) {
     Card(
@@ -40,20 +47,21 @@ internal fun ResultComponent(state: QuizState.Result, onTryAgainClick: () -> Uni
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                repeat(QuizNetworkRepository.COUNT_OF_QUESTIONS_IN_ONE_QUIZ) {
+                repeat(QuizNetworkRepository.COUNT_OF_QUESTIONS_IN_ONE_QUIZ) { index ->
                     Image(
                         painter = painterResource(
-                            if (it <= state.quizResult.correctAnswers) R.drawable.filled_star
+                            if (index < state.quizResult.correctAnswers) R.drawable.filled_star
                             else R.drawable.star
-                        ), contentDescription = stringResource(R.string.star)
+                        ),
+                        contentDescription = stringResource(R.string.star)
                     )
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = "${state.quizResult.correctAnswers} " +
-                        "${stringResource(R.string.from)} " +
-                        "${QuizNetworkRepository.COUNT_OF_QUESTIONS_IN_ONE_QUIZ}",
+                        stringResource(R.string.from) + " " +
+                        QuizNetworkRepository.COUNT_OF_QUESTIONS_IN_ONE_QUIZ,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 color = StarTextColor
@@ -69,10 +77,10 @@ internal fun ResultComponent(state: QuizState.Result, onTryAgainClick: () -> Uni
                         QuizResult.Score4Of5 -> R.string.rating_4_title
                         QuizResult.Score5Of5 -> R.string.rating_5_title
                     }
-                ), fontSize = 24.sp,
+                ),
+                fontSize = 24.sp,
                 textAlign = TextAlign.Center
             )
-
             Text(
                 text = stringResource(
                     id = when (state.quizResult) {
@@ -83,7 +91,8 @@ internal fun ResultComponent(state: QuizState.Result, onTryAgainClick: () -> Uni
                         QuizResult.Score4Of5 -> R.string.rating_4_description
                         QuizResult.Score5Of5 -> R.string.rating_5_description
                     }
-                ), fontSize = 16.sp,
+                ),
+                fontSize = 16.sp,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(64.dp))

@@ -36,13 +36,20 @@ import ru.vafeen.presentation.ui.components.Question
 import ru.vafeen.presentation.ui.components.ResultComponent
 import ru.vafeen.presentation.ui.components.Welcome
 
+/**
+ * Компонент экрана викторины, отображающий различные состояния викторины,
+ * управляемые через [QuizViewModel].
+ *
+ * @param viewModel ViewModel для управления состояниями и обработкой интентов.
+ */
 @Composable
 internal fun QuizScreen(
     viewModel: QuizViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
     Scaffold(
-        modifier = Modifier.fillMaxSize(), containerColor = MaterialTheme.colorScheme.primary
+        modifier = Modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.primary
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -59,9 +66,12 @@ internal fun QuizScreen(
                     contentAlignment = Alignment.Center,
                 ) {
                     if (state is QuizState.Start || state is QuizState.Error) {
-                        Button(onClick = {
-                            viewModel.handleIntent(QuizIntent.NavigateToHistory)
-                        }, colors = ButtonDefaults.buttonColors(containerColor = Color.White)) {
+                        Button(
+                            onClick = {
+                                viewModel.handleIntent(QuizIntent.NavigateToHistory)
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+                        ) {
                             Text(
                                 stringResource(R.string.history),
                                 fontSize = 12.sp,
@@ -78,6 +88,7 @@ internal fun QuizScreen(
                     }
                 }
             }
+
             if (state !is QuizState.Result) {
                 Box(
                     modifier = Modifier
@@ -90,7 +101,8 @@ internal fun QuizScreen(
                             modifier = Modifier
                                 .align(Alignment.CenterStart)
                                 .size(24.dp),
-                            onClick = { viewModel.handleIntent(QuizIntent.ReturnToBeginning) }) {
+                            onClick = { viewModel.handleIntent(QuizIntent.ReturnToBeginning) }
+                        ) {
                             Icon(
                                 painter = painterResource(R.drawable.arrow_back),
                                 contentDescription = stringResource(R.string.back)
@@ -98,60 +110,66 @@ internal fun QuizScreen(
                         }
                     }
                     Image(
-                        modifier = Modifier
-                            .size(
-                                width = if (state is QuizState.Quiz) 180.dp
-                                else 300.dp,
-                                height = if (state is QuizState.Quiz) 40.dp
-                                else 68.dp
-                            ),
+                        modifier = Modifier.size(
+                            width = if (state is QuizState.Quiz) 180.dp else 300.dp,
+                            height = if (state is QuizState.Quiz) 40.dp else 68.dp
+                        ),
                         painter = painterResource(R.drawable.daily_quiz),
                         contentDescription = stringResource(R.string.daily_quiz)
                     )
+                }
+            }
 
+            when (state) {
+                is QuizState.Start -> {
+                    Welcome {
+                        viewModel.handleIntent(QuizIntent.BeginQuiz)
+                    }
                 }
-            }
-            if (state is QuizState.Error || state is QuizState.Start) {
-                Welcome {
-                    viewModel.handleIntent(QuizIntent.BeginQuiz)
+
+                is QuizState.Error -> {
+                    Error()
                 }
-            }
-            if (state is QuizState.Error) {
-                Error()
-            }
-            if (state is QuizState.Loading) {
-                LoadingQuiz()
-            }
-            if (state is QuizState.Quiz) {
-                Spacer(modifier = Modifier.height(40.dp))
-                Question(
-                    state = state as QuizState.Quiz, chooseAnswer = { answer ->
-                        viewModel.handleIntent(QuizIntent.ChoseAnswer(answer))
-                    }, confirmAnswer = {
-                        viewModel.handleIntent(QuizIntent.ConfirmChosenAnswer)
-                    })
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = stringResource(R.string.cant_return_to_previous_questions),
-                    color = Color.White,
-                    fontSize = 10.sp
-                )
-            }
-            if (state is QuizState.Result) {
-                Spacer(modifier = Modifier.height(32.dp))
-                Text(
-                    text = stringResource(R.string.results),
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(40.dp))
-                ResultComponent(state as QuizState.Result, onTryAgainClick = {
-                    viewModel.handleIntent(QuizIntent.TryAgain)
-                })
+
+                is QuizState.Loading -> {
+                    LoadingQuiz()
+                }
+
+                is QuizState.Quiz -> {
+                    Spacer(modifier = Modifier.height(40.dp))
+                    Question(
+                        state = state as QuizState.Quiz,
+                        chooseAnswer = { answer ->
+                            viewModel.handleIntent(QuizIntent.ChoseAnswer(answer))
+                        },
+                        confirmAnswer = {
+                            viewModel.handleIntent(QuizIntent.ConfirmChosenAnswer)
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(R.string.cant_return_to_previous_questions),
+                        color = Color.White,
+                        fontSize = 10.sp
+                    )
+                }
+
+                is QuizState.Result -> {
+                    Spacer(modifier = Modifier.height(32.dp))
+                    Text(
+                        text = stringResource(R.string.results),
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(40.dp))
+                    ResultComponent(
+                        state = state as QuizState.Result,
+                        onTryAgainClick = {
+                            viewModel.handleIntent(QuizIntent.TryAgain)
+                        }
+                    )
+                }
             }
         }
     }
 }
-
-
-

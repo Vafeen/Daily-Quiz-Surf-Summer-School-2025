@@ -13,12 +13,23 @@ import ru.vafeen.domain.network.ResponseResult
 import ru.vafeen.domain.network.usecase.GetQuizUseCase
 import javax.inject.Inject
 
+/**
+ * ViewModel экрана викторины, управляющая состояниями викторины и обработкой пользовательских действий.
+ *
+ * @property getQuizUseCase use case для загрузки вопросов викторины.
+ */
 @HiltViewModel
 internal class QuizViewModel @Inject constructor(
     private val getQuizUseCase: GetQuizUseCase,
 ) : ViewModel() {
     private val _state = MutableStateFlow<QuizState>(QuizState.Start)
     val state = _state.asStateFlow()
+
+    /**
+     * Обрабатывает интенты (действия) от UI.
+     *
+     * @param intent Интент пользователя.
+     */
     fun handleIntent(intent: QuizIntent) {
         viewModelScope.launch(Dispatchers.IO) {
             when (intent) {
@@ -32,23 +43,23 @@ internal class QuizViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Подтверждает выбранный ответ, обновляет состояние текущего вопроса либо переходит к следующему,
+     * а по окончании викторины вычисляет результат и переходит в состояние результата.
+     */
     private fun confirmAnswer() {
         val state = _state.value
         if (state is QuizState.Quiz) {
             val currentQuestion = state.currentQuestion
-            // в вопрос кладем выбранный ответ, чтобы показать, что пользователь сделал выбор
             if (currentQuestion != null) {
                 if (currentQuestion.chosenAnswer == null) {
                     _state.update {
                         state.copy(currentQuestion = currentQuestion.copy(chosenAnswer = state.chosenAnswer))
                     }
                 } else {
-                    // если выбор уже сделан, показываем следующий вопрос
                     val newStateWithNewQuestions = state.copy(
-                        questions = state.questions.filter {
-                            it.question != state.currentQuestion.question
-                        },
-                        passedQuestions = state.currentQuestion.let { state.passedQuestions.plus(it) },
+                        questions = state.questions.filter { it.question != state.currentQuestion.question },
+                        passedQuestions = state.passedQuestions.plus(state.currentQuestion)
                     )
                     val newCurrentQuestion = newStateWithNewQuestions.questions.firstOrNull()
                     val newStateWithNewQuestionsAndAnswer = newStateWithNewQuestions.copy(
@@ -57,12 +68,11 @@ internal class QuizViewModel @Inject constructor(
                     )
                     _state.update { newStateWithNewQuestionsAndAnswer }
                     if (newCurrentQuestion == null) {
-                        // значит, вопросы закончились
                         val countOfRightQuestions = newStateWithNewQuestionsAndAnswer
                             .passedQuestions
                             .count { question -> question.chosenAnswer == question.correctAnswer }
 
-                        // todo сделать сохранение результатов
+                        // TODO: Реализовать сохранение результатов викторины
 
                         _state.update {
                             QuizState.Result(
@@ -75,6 +85,11 @@ internal class QuizViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Устанавливает выбранный ответ в состояние.
+     *
+     * @param answer Выбранный пользователем ответ.
+     */
     private fun choseAnswer(answer: String) {
         val state = _state.value
         if (state is QuizState.Quiz) {
@@ -82,17 +97,26 @@ internal class QuizViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Возвращает состояние к началу викторины.
+     */
     private fun returnToBeginning() {
         _state.update { QuizState.Start }
     }
 
+    /**
+     * Обрабатывает навигацию к экрану истории.
+     * Пока не реализовано.
+     */
     private fun navigateToHistory() {
-        // TODO (add navigation to history)
+        // TODO: добавить навигацию к истории
     }
 
+    /**
+     * Запускает загрузку вопросов викторины и обновляет состояние.
+     */
     private suspend fun beginQuiz() {
         _state.update { QuizState.Loading }
-//        delay(2000)
         when (val quizzes = getQuizUseCase.invoke()) {
             is ResponseResult.Success<List<QuizQuestion>> -> _state.update {
                 QuizState.Quiz(

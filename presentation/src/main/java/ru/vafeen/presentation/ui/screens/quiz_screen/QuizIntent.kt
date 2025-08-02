@@ -11,16 +11,36 @@ internal sealed class QuizIntent {
      * Интент начала викторины.
      * Отправляется при нажатии на кнопку "Начать викторину".
      */
-    data object BeginQuiz : QuizIntent()
+    object BeginQuiz : QuizIntent()
 
     /**
      * Интент перехода к экрану истории.
      * Отправляется при нажатии на кнопку перехода к истории викторин.
      */
-    data object NavigateToHistory : QuizIntent()
+    object NavigateToHistory : QuizIntent()
 
-    data object ReturnToBeginning : QuizIntent()
+    /**
+     * Интент возврата к начальному экрану викторины.
+     * Отправляется при возврате пользователя к началу.
+     */
+    object ReturnToBeginning : QuizIntent()
+
+    /**
+     * Интент выбора пользователем варианта ответа.
+     *
+     * @property answer Выбранный ответ в виде строки.
+     */
     data class ChoseAnswer(val answer: String) : QuizIntent()
-    data object ConfirmChosenAnswer : QuizIntent()
-    data object TryAgain : QuizIntent()
+
+    /**
+     * Интент подтверждения выбранного ответа.
+     * Отправляется, когда пользователь подтверждает свой выбор.
+     */
+    object ConfirmChosenAnswer : QuizIntent()
+
+    /**
+     * Интент повторной попытки пройти викторину.
+     * Используется при нажатии кнопки "Попробовать снова".
+     */
+    object TryAgain : QuizIntent()
 }
