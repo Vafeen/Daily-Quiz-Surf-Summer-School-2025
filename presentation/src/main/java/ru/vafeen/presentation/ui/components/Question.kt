@@ -17,10 +17,10 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import ru.vafeen.presentation.AnswerState
 import ru.vafeen.presentation.R
 import ru.vafeen.presentation.ui.screens.quiz_screen.QuizState
 import ru.vafeen.presentation.ui.theme.QuestionNumberColor
+import ru.vafeen.presentation.utils.AnswerState
 
 /**
  * Компонент вопроса викторины с вариантами ответов и кнопкой подтверждения выбора.

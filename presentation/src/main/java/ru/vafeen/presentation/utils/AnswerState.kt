@@ -1,9 +1,9 @@
-package ru.vafeen.presentation
+package ru.vafeen.presentation.utils
 
-import ru.vafeen.presentation.AnswerState.Chosen
-import ru.vafeen.presentation.AnswerState.Correct
-import ru.vafeen.presentation.AnswerState.Free
-import ru.vafeen.presentation.AnswerState.Incorrect
+import ru.vafeen.presentation.utils.AnswerState.Chosen
+import ru.vafeen.presentation.utils.AnswerState.Correct
+import ru.vafeen.presentation.utils.AnswerState.Free
+import ru.vafeen.presentation.utils.AnswerState.Incorrect
 
 
 /**
