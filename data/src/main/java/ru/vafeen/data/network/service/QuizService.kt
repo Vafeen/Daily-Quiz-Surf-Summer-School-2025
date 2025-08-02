@@ -13,7 +13,7 @@ internal interface QuizService {
      *
      * @return [QuizResponse] — DTO с кодом ответа и списком вопросов викторины.
      */
-    @GET("api.php?amount=5")
+    @GET("api.php?amount=5&difficulty=easy")
     suspend fun getQuiz(): QuizResponse
 
     companion object {
