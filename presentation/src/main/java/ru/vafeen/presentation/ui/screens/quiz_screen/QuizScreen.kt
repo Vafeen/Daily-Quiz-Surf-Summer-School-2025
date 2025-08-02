@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.vafeen.presentation.R
+import ru.vafeen.presentation.ui.components.RounderCornerButton
 
 @Composable
 internal fun QuizScreen(
@@ -132,7 +133,7 @@ private fun Welcome(onBegin: () -> Unit) {
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(40.dp))
-                Button(onClick = onBegin) {
+                RounderCornerButton(onClick = onBegin) {
                     Text(
                         stringResource(R.string.start_the_quiz).uppercase(),
                         fontSize = 16.sp,

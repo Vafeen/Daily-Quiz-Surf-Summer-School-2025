@@ -23,6 +23,14 @@ import ru.vafeen.presentation.ui.theme.White90
 import ru.vafeen.presentation.ui.theme.White95
 import kotlin.math.sin
 
+/**
+ * Круговой индикатор загрузки с градиентными полосками, расходящимися из центра.
+ *
+ * @property modifier Модификатор для настройки внешнего вида и поведения компонента
+ * @property strokeWidth Толщина линий индикатора (по умолчанию 12 пикселей)
+ * @property gradientColors Список цветов для градиента полосок (по умолчанию белые оттенки)
+ * @property animationDuration Продолжительность полного цикла анимации в миллисекундах (по умолчанию 2000 мс)
+ */
 @Composable
 internal fun RadialGradientLoader(
     modifier: Modifier = Modifier,
@@ -38,6 +46,10 @@ internal fun RadialGradientLoader(
     animationDuration: Int = 2000
 ) {
     val infiniteTransition = rememberInfiniteTransition()
+
+    /**
+     * Анимация вращения индикатора (0-360 градусов)
+     */
     val rotationAngle by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
@@ -47,7 +59,9 @@ internal fun RadialGradientLoader(
         )
     )
 
-    // Анимация для смещения градиента
+    /**
+     * Анимация прогресса градиента (0-1)
+     */
     val gradientProgress by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
@@ -62,14 +76,17 @@ internal fun RadialGradientLoader(
         val radius = size.minDimension / 2 - strokeWidth
         val barLength = radius * 0.5f
 
-        // Создаем градиент с помощью доступной функции sweepGradient
+        /**
+         * Создает градиентную кисть для рисования полосок
+         */
         val gradient = Brush.sweepGradient(
             colors = gradientColors,
             center = center
         )
 
-
-        // Рисуем 10 палочек с вращением и градиентом
+        /**
+         * Рисует 10 анимированных полосок с градиентом
+         */
         repeat(10) { i ->
             val angle = i * 36f + rotationAngle
 
@@ -83,9 +100,19 @@ internal fun RadialGradientLoader(
                     end = end,
                     strokeWidth = strokeWidth,
                     cap = StrokeCap.Round,
-                    alpha = 0.7f + 0.3f * sin((gradientProgress * 2 * Math.PI + i * 0.2f).toFloat())
+                    alpha = calculateLineAlpha(gradientProgress, i)
                 )
             }
         }
     }
 }
+
+/**
+ * Вычисляет прозрачность для отдельной полоски индикатора.
+ *
+ * @param progress Текущий прогресс анимации (0-1)
+ * @param lineIndex Индекс полоски (0-9)
+ * @return Значение прозрачности (0.7-1.0)
+ */
+private fun calculateLineAlpha(progress: Float, lineIndex: Int): Float =
+    0.7f + 0.3f * sin((progress * 2 * Math.PI + lineIndex * 0.2f).toFloat())
