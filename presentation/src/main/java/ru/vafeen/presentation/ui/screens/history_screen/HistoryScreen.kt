@@ -1,5 +1,6 @@
 package ru.vafeen.presentation.ui.screens.history_screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,8 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -23,10 +26,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -35,6 +43,7 @@ import ru.vafeen.presentation.navigation.SendRootIntent
 import ru.vafeen.presentation.ui.components.QuizHistoryInfoComponent
 import ru.vafeen.presentation.ui.components.YouNeverTakenAnyQuizzes
 import ru.vafeen.presentation.ui.theme.AppTheme
+import ru.vafeen.presentation.utils.pxToDp
 
 /**
  * Экран истории сессий викторины.
@@ -50,6 +59,7 @@ import ru.vafeen.presentation.ui.theme.AppTheme
 internal fun HistoryScreen(
     sendRootIntent: SendRootIntent,
 ) {
+    val context = LocalContext.current
     val viewModel: HistoryViewModel =
         hiltViewModel<HistoryViewModel, HistoryViewModel.Factory>(creationCallback = { factory ->
             factory.create(sendRootIntent)
@@ -58,7 +68,7 @@ internal fun HistoryScreen(
 
     var selectedSessionForMenu by remember { mutableStateOf<Long?>(null) }
     val dropdownExpanded = selectedSessionForMenu != null
-
+    var intSize by remember { mutableStateOf(IntSize(0, 0)) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -110,14 +120,18 @@ internal fun HistoryScreen(
 
                     Box(
                         modifier = Modifier
+                            .fillMaxWidth()
                             // Затемняем все элементы, кроме выбранного, при открытом меню
                             .graphicsLayer {
                                 alpha = if (dropdownExpanded && !isSelected) 0.5f else 1f
-                            }
+                            },
                     ) {
                         session.QuizHistoryInfoComponent(
                             modifier = Modifier
-                                .fillMaxWidth(),
+                                .fillMaxWidth()
+                                .onSizeChanged {
+                                    intSize = it
+                                },
                             innerModifier = Modifier
                                 // Долгое нажатие — выделить элемент и открыть меню
                                 .combinedClickable(
@@ -134,22 +148,41 @@ internal fun HistoryScreen(
 
                         if (isSelected) {
                             DropdownMenu(
-                                modifier = Modifier.align(Alignment.BottomEnd),
+                                shape = RoundedCornerShape(25.dp),
                                 expanded = dropdownExpanded,
-                                onDismissRequest = {
-                                    selectedSessionForMenu = null
-                                }
+                                onDismissRequest = { selectedSessionForMenu = null },
+                                modifier = Modifier
+                                    .background(Color.White)
+                                    .width((intSize.width.pxToDp(context) * 2 / 3).dp),
+                                offset = DpOffset((intSize.width.pxToDp(context) / 6).dp, 20.dp)
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Удалить") },
+                                    text = {
+                                        Text(
+                                            text = stringResource(R.string.delete),
+                                            color = Color.Red,
+                                            modifier = Modifier.fillMaxWidth(),
+                                        )
+                                    },
+                                    trailingIcon = {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_delete),
+                                            contentDescription = stringResource(R.string.delete),
+                                            tint = Color.Red
+                                        )
+                                    },
                                     onClick = {
-                                        // Вызов интента удаления сессии
-                                        viewModel.handleIntent(HistoryIntent.DeleteSession(session.sessionId))
+                                        viewModel.handleIntent(
+                                            HistoryIntent.DeleteSession(
+                                                session.sessionId
+                                            )
+                                        )
                                         selectedSessionForMenu = null
-                                    }
+                                    },
                                 )
                             }
                         }
+
                     }
                 }
             }
