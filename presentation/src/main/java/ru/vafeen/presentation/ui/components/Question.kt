@@ -1,10 +1,14 @@
 package ru.vafeen.presentation.ui.components
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -15,13 +19,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ru.vafeen.domain.models.QuizQuestion
 import ru.vafeen.presentation.R
-import ru.vafeen.presentation.ui.screens.quiz_screen.QuizState
 import ru.vafeen.presentation.ui.theme.QuestionNumberColor
-import ru.vafeen.presentation.utils.AnswerState
 
 /**
  * Компонент вопроса викторины с вариантами ответов и кнопкой подтверждения выбора.
@@ -35,9 +39,13 @@ import ru.vafeen.presentation.utils.AnswerState
  */
 @Composable
 internal fun Question(
-    state: QuizState.Quiz,
-    chooseAnswer: (String) -> Unit,
-    confirmAnswer: () -> Unit,
+    currentQuestion: QuizQuestion,
+    numberOfCurrentQuestion: Int,
+    quantityOfQuestions: Int,
+    chosenAnswer: String?,
+    chooseAnswer: ((String) -> Unit)? = null,
+    confirmAnswer: (() -> Unit)? = null,
+    isItResult: Boolean? = null
 ) {
     Card(
         shape = RoundedCornerShape(dimensionResource(R.dimen.card_corner_radius)),
@@ -47,57 +55,73 @@ internal fun Question(
             modifier = Modifier.padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            state.currentQuestion?.let { currentQuestion ->
-                val passedSize = state.passedQuestions.size
+
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = if (isItResult != null) Arrangement.SpaceBetween else Arrangement.Center
+            ) {
                 Text(
-                    text = "Вопрос ${passedSize + 1} из ${passedSize + state.questions.size}",
+                    text = "Вопрос $numberOfCurrentQuestion из $quantityOfQuestions",
                     color = QuestionNumberColor
                 )
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(
-                    text = currentQuestion.question,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                currentQuestion.allAnswers.forEach { answer ->
-                    Answer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        text = answer,
-                        answerState = when {
-                            // Выбран пользователем, но не подтвержден
-                            answer == state.chosenAnswer && currentQuestion.chosenAnswer == null ->
-                                AnswerState.Chosen
-
-                            // Подтвержден правильный ответ
-                            currentQuestion.chosenAnswer != null &&
-                                    answer == currentQuestion.chosenAnswer &&
-                                    answer == currentQuestion.correctAnswer ->
-                                AnswerState.Correct
-
-                            // Подтвержден неправильный ответ
-                            currentQuestion.chosenAnswer != null &&
-                                    answer == currentQuestion.chosenAnswer &&
-                                    answer != currentQuestion.correctAnswer ->
-                                AnswerState.Incorrect
-
-                            // Все остальные ответы свободны (без выбора)
-                            else -> AnswerState.Free
-                        },
-                        onClick = if (currentQuestion.chosenAnswer == null) {
-                            { chooseAnswer(answer) }
-                        } else null
+                if (isItResult != null) {
+                    Image(
+                        modifier = Modifier.size(20.dp),
+                        painter = painterResource(
+                            if (isItResult) R.drawable.correct_circle
+                            else R.drawable.incorrect_circle
+                        ),
+                        contentDescription = stringResource(R.string.answer_state)
                     )
                 }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = currentQuestion.question,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            currentQuestion.allAnswers.forEach { answer ->
+                Answer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    text = answer,
+                    answerState = when {
+                        // Выбран пользователем, но не подтвержден
+                        answer == chosenAnswer && currentQuestion.chosenAnswer == null ->
+                            AnswerState.Chosen
+
+                        // Подтвержден правильный ответ
+                        currentQuestion.chosenAnswer != null &&
+                                answer == currentQuestion.chosenAnswer &&
+                                answer == currentQuestion.correctAnswer ->
+                            AnswerState.Correct
+
+                        // Подтвержден неправильный ответ
+                        currentQuestion.chosenAnswer != null &&
+                                answer == currentQuestion.chosenAnswer &&
+                                answer != currentQuestion.correctAnswer ->
+                            AnswerState.Incorrect
+
+                        // Все остальные ответы свободны (без выбора)
+                        else -> AnswerState.Free
+                    },
+                    onClick = if (currentQuestion.chosenAnswer == null && chooseAnswer != null) {
+                        { chooseAnswer(answer) }
+                    } else null
+                )
+            }
+            if (confirmAnswer != null) {
                 RounderCornerButton(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = confirmAnswer,
-                    enabled = state.chosenAnswer != null,
+                    enabled = chosenAnswer != null,
                     containerColor = MaterialTheme.colorScheme.primary
                 ) {
                     Text(
-                        text = if (state.questions.size == 1)
+                        text = if (quantityOfQuestions == numberOfCurrentQuestion)
                             stringResource(R.string.complete)
                         else stringResource(R.string.onward)
                     )

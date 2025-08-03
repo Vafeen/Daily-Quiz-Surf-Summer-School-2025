@@ -54,6 +54,7 @@ internal class HistoryViewModel @AssistedInject constructor(
             when (intent) {
                 is HistoryIntent.NavigateToSession -> navigateToSession(intent.id)
                 HistoryIntent.StartQuiz -> startQuiz()
+                HistoryIntent.Back -> back()
             }
         }
     }
@@ -69,6 +70,8 @@ internal class HistoryViewModel @AssistedInject constructor(
         }
     }
 
+    private fun back() = sendRootIntent(NavRootIntent.Back)
+
     /**
      * Инициирует навигацию к экрану с результатами конкретной сессии викторины.
      *
@@ -81,9 +84,9 @@ internal class HistoryViewModel @AssistedInject constructor(
 
 
     /**
-     * Инициирует запуск новой викторины.
+     * Выход на главный экран для запуска викторины
      */
-    private fun startQuiz() = sendRootIntent(NavRootIntent.StartTheQuiz)
+    private fun startQuiz() = sendRootIntent(NavRootIntent.Back)
 
     /**
      * Фабрика для создания экземпляров [HistoryViewModel] с необходимыми параметрами.

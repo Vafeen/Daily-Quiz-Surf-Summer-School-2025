@@ -15,5 +15,6 @@ internal sealed class HistoryIntent {
     /**
      * Начать новую сессию викторины.
      */
-    object StartQuiz : HistoryIntent()
+    data object StartQuiz : HistoryIntent()
+    data object Back : HistoryIntent()
 }
