@@ -69,9 +69,10 @@ internal class HistoryViewModel @AssistedInject constructor(
         )
 
 
-    private fun startQuiz() {
-        // TODO(логика начала квиза)
-    }
+    /**
+     * Инициирует запуск новой викторины.
+     */
+    private fun startQuiz() = sendRootIntent(NavRootIntent.StartTheQuiz)
 
     @AssistedFactory
     interface Factory {
