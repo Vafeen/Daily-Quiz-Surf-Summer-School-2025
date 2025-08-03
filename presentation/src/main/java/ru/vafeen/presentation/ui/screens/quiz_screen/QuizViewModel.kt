@@ -26,9 +26,9 @@ import ru.vafeen.presentation.navigation.SendRootIntent
 /**
  * ViewModel экрана викторины, управляющая состояниями викторины и обработкой пользовательских действий.
  *
- * @property sendRootIntent функция для отправки навигационных интентов в корневой навигационный обработчик
- * @property getQuizUseCase юзкейс для получения вопросов викторины
- * @property saveQuizSessionResultUseCase юзкейс для сохранения результатов сессии викторины
+ * @property sendRootIntent функция для отправки навигационных интентов в корневой навигационный обработчик.
+ * @property getQuizUseCase юзкейс для получения вопросов викторины.
+ * @property saveQuizSessionResultUseCase юзкейс для сохранения результатов сессии викторины.
  */
 @HiltViewModel(assistedFactory = QuizViewModel.Factory::class)
 internal class QuizViewModel @AssistedInject constructor(
@@ -36,18 +36,20 @@ internal class QuizViewModel @AssistedInject constructor(
     private val getQuizUseCase: GetQuizUseCase,
     private val saveQuizSessionResultUseCase: SaveQuizSessionResultUseCase,
 ) : ViewModel() {
+
     private val _state = MutableStateFlow<QuizState>(QuizState.Start)
 
     /**
      * Текущее состояние экрана викторины.
      */
     val state = _state.asStateFlow()
+
     private var timerJob: Job? = null
 
     /**
      * Обрабатывает интенты (действия) от UI.
      *
-     * @param intent интент пользователя с описанием действия
+     * @param intent интент пользователя с описанием действия.
      */
     fun handleIntent(intent: QuizIntent) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -61,27 +63,34 @@ internal class QuizViewModel @AssistedInject constructor(
         }
     }
 
+    /**
+     * Запускает таймер для викторины, который обновляет прошедшее время каждую секунду.
+     * По истечении отведённого времени показывает диалог с проигрышем.
+     */
     private fun startTimer() {
         timerJob = viewModelScope.launch(Dispatchers.IO) {
-            val quantity = (_state.value as QuizState.Quiz).quantityOfSeconds
+            val quantity = (_state.value as? QuizState.Quiz)?.quantityOfSeconds ?: return@launch
             val startMillis = System.currentTimeMillis()
             var currentMillis = startMillis
             while (isActive && (currentMillis - startMillis) / 1000 < quantity) {
                 currentMillis = System.currentTimeMillis()
-                _state.update {
-                    if (it is QuizState.Quiz) {
-                        it.copy(currentSeconds = (currentMillis - startMillis) / 1000)
-                    } else return@launch
+                _state.update { currentState ->
+                    if (currentState is QuizState.Quiz) {
+                        currentState.copy(currentSeconds = (currentMillis - startMillis) / 1000)
+                    } else currentState
                 }
             }
-            _state.update {
-                if (it is QuizState.Quiz) {
-                    it.copy(isDialogLoseShown = true)
-                } else return@launch
+            _state.update { currentState ->
+                if (currentState is QuizState.Quiz) {
+                    currentState.copy(isDialogLoseShown = true)
+                } else currentState
             }
         }
     }
 
+    /**
+     * Останавливает таймер, если он запущен.
+     */
     private suspend fun stopTimer() {
         timerJob?.cancelAndJoin()
     }
@@ -94,16 +103,18 @@ internal class QuizViewModel @AssistedInject constructor(
         val state = _state.value
         if (state is QuizState.Quiz) {
             val currentQuestion = state.currentQuestion
+            // Если текущий вопрос ещё не подтверждён
             if (currentQuestion.chosenAnswer == null) {
                 _state.update {
                     state.copy(currentQuestion = currentQuestion.copy(chosenAnswer = state.chosenAnswer))
                 }
             } else {
+                // Поднимаем состояние с оставшимися и пройденными вопросами
                 val newStateWithNewQuestions = state.copy(
                     questions = state.questions.filter { it.question != state.currentQuestion.question },
                     passedQuestions = state.passedQuestions + state.currentQuestion
                 )
-                // взяли новый потенциальный вопрос
+                // Пробуем получить следующй вопрос
                 val newCurrentQuestion = newStateWithNewQuestions.questions.firstOrNull()
 
                 if (newCurrentQuestion != null) {
@@ -113,6 +124,7 @@ internal class QuizViewModel @AssistedInject constructor(
                     )
                     _state.update { newStateWithNewQuestionsAndAnswer }
                 } else {
+                    // Викторина завершена
                     stopTimer()
                     val countOfRightAnswers = newStateWithNewQuestions
                         .passedQuestions
@@ -135,7 +147,7 @@ internal class QuizViewModel @AssistedInject constructor(
     /**
      * Устанавливает выбранный пользователем ответ в состояние.
      *
-     * @param answer выбранный ответ
+     * @param answer выбранный ответ.
      */
     private fun choseAnswer(answer: String) {
         val state = _state.value
@@ -158,7 +170,6 @@ internal class QuizViewModel @AssistedInject constructor(
     private fun navigateToHistory() {
         sendRootIntent(NavRootIntent.AddToBackStack(Screen.HistoryScreen))
     }
-
 
     /**
      * Запускает загрузку вопросов викторины и обновляет состояние.
@@ -189,8 +200,8 @@ internal class QuizViewModel @AssistedInject constructor(
         /**
          * Создает экземпляр [QuizViewModel].
          *
-         * @param sendRootIntent функция для отправки навигационных интентов
-         * @return новый экземпляр [QuizViewModel]
+         * @param sendRootIntent функция для отправки навигационных интентов.
+         * @return новый экземпляр [QuizViewModel].
          */
         fun create(sendRootIntent: SendRootIntent): QuizViewModel
     }
