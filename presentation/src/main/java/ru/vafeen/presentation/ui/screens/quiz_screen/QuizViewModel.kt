@@ -7,9 +7,12 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import ru.vafeen.domain.local_database.usecase.SaveQuizSessionResultUseCase
 import ru.vafeen.domain.models.QuizQuestion
@@ -39,6 +42,7 @@ internal class QuizViewModel @AssistedInject constructor(
      * Текущее состояние экрана викторины.
      */
     val state = _state.asStateFlow()
+    private var timerJob: Job? = null
 
     /**
      * Обрабатывает интенты (действия) от UI.
@@ -57,6 +61,30 @@ internal class QuizViewModel @AssistedInject constructor(
         }
     }
 
+    private fun startTimer() {
+        timerJob = viewModelScope.launch(Dispatchers.IO) {
+            val quantity = (_state.value as QuizState.Quiz).quantityOfSeconds
+            val startMillis = System.currentTimeMillis()
+            var currentMillis = startMillis
+            while (isActive && (currentMillis - startMillis) / 1000 < quantity) {
+                currentMillis = System.currentTimeMillis()
+                _state.update {
+                    if (it is QuizState.Quiz) {
+                        it.copy(currentSeconds = (currentMillis - startMillis) / 1000)
+                    } else return@launch
+                }
+            }
+            _state.update {
+                if (it is QuizState.Quiz) {
+                    it.copy(isDialogLoseShown = true)
+                } else return@launch
+            }
+        }
+    }
+
+    private suspend fun stopTimer() {
+        timerJob?.cancelAndJoin()
+    }
 
     /**
      * Подтверждает выбранный ответ, обновляет состояние текущего вопроса либо переходит к следующему вопросу.
@@ -85,6 +113,7 @@ internal class QuizViewModel @AssistedInject constructor(
                     )
                     _state.update { newStateWithNewQuestionsAndAnswer }
                 } else {
+                    stopTimer()
                     val countOfRightAnswers = newStateWithNewQuestions
                         .passedQuestions
                         .count { question -> question.chosenAnswer == question.correctAnswer }
@@ -118,7 +147,8 @@ internal class QuizViewModel @AssistedInject constructor(
     /**
      * Возвращает состояние викторины к начальному экрану.
      */
-    private fun returnToBeginning() {
+    private suspend fun returnToBeginning() {
+        stopTimer()
         _state.update { QuizState.Start }
     }
 
@@ -129,12 +159,6 @@ internal class QuizViewModel @AssistedInject constructor(
         sendRootIntent(NavRootIntent.AddToBackStack(Screen.HistoryScreen))
     }
 
-    /**
-     * Возвращает состояние викторины к начальному экрану (повторный запуск).
-     */
-    private fun tryAgain() {
-        _state.update { QuizState.Start }
-    }
 
     /**
      * Запускает загрузку вопросов викторины и обновляет состояние.
@@ -143,11 +167,14 @@ internal class QuizViewModel @AssistedInject constructor(
     private suspend fun beginQuiz() {
         _state.update { QuizState.Loading }
         when (val quizzes = getQuizUseCase.invoke()) {
-            is ResponseResult.Success<List<QuizQuestion>> -> _state.update {
-                QuizState.Quiz(
-                    questions = quizzes.data,
-                    currentQuestion = quizzes.data.first()
-                )
+            is ResponseResult.Success<List<QuizQuestion>> -> {
+                _state.update {
+                    QuizState.Quiz(
+                        questions = quizzes.data,
+                        currentQuestion = quizzes.data.first()
+                    )
+                }
+                startTimer()
             }
 
             is ResponseResult.Error -> _state.update { QuizState.Error }

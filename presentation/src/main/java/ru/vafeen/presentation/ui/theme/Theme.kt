@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 internal data class AppThemeColors(
     val background: Color,
     val cardBackground: Color,
+    val cardOnCardBackground: Color,
     val text: Color,
     val questionNumberColor: Color, // текст для Вопрос 1 из 5
     val quizNameText: Color,
@@ -21,6 +22,7 @@ internal data class AppThemeColors(
 private val basePalette = AppThemeColors(
     background = VioletBlue,
     cardBackground = Color.White,
+    cardOnCardBackground = Color.LightGray,
     text = Color.Black,
     questionNumberColor = QuestionNumberColor,
     quizNameText = DarkBlue,
@@ -30,7 +32,9 @@ private val basePalette = AppThemeColors(
 )
 
 private val baseDarkPalette = basePalette.copy(
-    cardBackground = Color.Black,
+    cardBackground = Color(0xFF313131),
+    cardOnCardBackground = Color(0xFF656565),
+    quizNameText = VioletBlue,
     text = Color.White,
 )
 

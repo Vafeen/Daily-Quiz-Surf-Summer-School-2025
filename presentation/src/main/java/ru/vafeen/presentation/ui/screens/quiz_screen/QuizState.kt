@@ -41,6 +41,9 @@ internal sealed class QuizState {
         val currentQuestion: QuizQuestion,
         val questions: List<QuizQuestion> = emptyList(),
         val passedQuestions: List<QuizQuestion> = emptyList(),
+        val currentSeconds: Long = 0,
+        val quantityOfSeconds: Float = 20f,
+        val isDialogLoseShown: Boolean = false,
     ) : QuizState()
 
     /**
