@@ -23,10 +23,9 @@ import ru.vafeen.presentation.navigation.SendRootIntent
 /**
  * ViewModel экрана викторины, управляющая состояниями викторины и обработкой пользовательских действий.
  *
- * @property isQuizStarted флаг, указывающий, началась ли викторина при запуске ViewModel
  * @property sendRootIntent функция для отправки навигационных интентов в корневой навигационный обработчик
- * @property getQuizUseCase юзкейc для получения вопросов викторины
- * @property saveQuizSessionResultUseCase юзкейc для сохранения результатов сессии викторины
+ * @property getQuizUseCase юзкейс для получения вопросов викторины
+ * @property saveQuizSessionResultUseCase юзкейс для сохранения результатов сессии викторины
  */
 @HiltViewModel(assistedFactory = QuizViewModel.Factory::class)
 internal class QuizViewModel @AssistedInject constructor(
@@ -162,6 +161,7 @@ internal class QuizViewModel @AssistedInject constructor(
     interface Factory {
         /**
          * Создает экземпляр [QuizViewModel].
+         *
          * @param sendRootIntent функция для отправки навигационных интентов
          * @return новый экземпляр [QuizViewModel]
          */

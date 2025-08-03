@@ -53,7 +53,7 @@ internal class HistoryViewModel @AssistedInject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             when (intent) {
                 is HistoryIntent.NavigateToSession -> navigateToSession(intent.id)
-                HistoryIntent.StartQuiz -> startQuiz()
+                HistoryIntent.ReturnToBeginning -> startQuiz()
                 HistoryIntent.Back -> back()
             }
         }
@@ -63,13 +63,16 @@ internal class HistoryViewModel @AssistedInject constructor(
         val months = context.resources.getStringArray(R.array.months).toList()
         viewModelScope.launch(Dispatchers.IO) {
             getAllSessionPreviewUseCase.invoke(months)
-                .map { it.reversed() } // отображаем в обратном порядке (сначала новые)
+                .map { it.reversed() }
                 .collect { sessions ->
                     _state.update { it.copy(sessions = sessions) }
                 }
         }
     }
 
+    /**
+     * Отправляет навигационный интент возврата назад.
+     */
     private fun back() = sendRootIntent(NavRootIntent.Back)
 
     /**
@@ -82,9 +85,8 @@ internal class HistoryViewModel @AssistedInject constructor(
             NavRootIntent.AddToBackStack(Screen.QuizSessionResult(sessionId = sessionId))
         )
 
-
     /**
-     * Выход на главный экран для запуска викторины
+     * Выполняет возврат на главный экран для запуска викторины.
      */
     private fun startQuiz() = sendRootIntent(NavRootIntent.Back)
 

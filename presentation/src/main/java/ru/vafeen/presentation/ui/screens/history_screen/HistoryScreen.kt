@@ -110,7 +110,7 @@ internal fun HistoryScreen(
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     YouNeverTakenAnyQuizzes {
-                        viewModel.handleIntent(HistoryIntent.StartQuiz)
+                        viewModel.handleIntent(HistoryIntent.ReturnToBeginning)
                     }
 
                     Image(

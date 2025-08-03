@@ -33,6 +33,15 @@ import ru.vafeen.presentation.ui.components.Question
 import ru.vafeen.presentation.ui.components.ResultComponent
 import ru.vafeen.presentation.ui.components.RounderCornerButton
 
+/**
+ * Экран с результатами сессии викторины.
+ *
+ * Отображает итоговый результат викторины, подробный список вопросов с выбранными ответами
+ * и предоставляет кнопку для повторного запуска викторины.
+ *
+ * @param sessionId уникальный идентификатор сессии викторины
+ * @param sendRootIntent функция для отправки навигационных интентов в корневой навигационный обработчик
+ */
 @Composable
 internal fun QuizSessionResultScreen(
     sessionId: Long,
@@ -114,7 +123,7 @@ internal fun QuizSessionResultScreen(
             }
             item {
                 RounderCornerButton(
-                    onClick = { viewModel.handleIntent(QuizSessionResultIntent.StartQuiz) },
+                    onClick = { viewModel.handleIntent(QuizSessionResultIntent.ReturnToBeginning) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 30.dp),

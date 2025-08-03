@@ -45,8 +45,7 @@ import ru.vafeen.presentation.ui.components.Welcome
  * Компонент экрана викторины, отображающий различные состояния викторины,
  * управляемые через [QuizViewModel].
  *
- * @param isQuizStarted флаг, указывающий, началась ли викторина
- * @param sendRootIntent функция для отправки навигационных интентов в корневой навигационный обработчик
+ * @param sendRootIntent Функция для отправки навигационных интентов в корневой навигационный обработчик.
  */
 @Composable
 internal fun QuizScreen(
@@ -59,6 +58,7 @@ internal fun QuizScreen(
             )
         })
     val state by viewModel.state.collectAsState()
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.primary
@@ -109,6 +109,9 @@ internal fun QuizScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     if (state is QuizState.Quiz) {
+                        BackHandler {
+                            viewModel.handleIntent(QuizIntent.ReturnToBeginning)
+                        }
                         IconButton(
                             modifier = Modifier
                                 .align(Alignment.CenterStart)
@@ -151,9 +154,6 @@ internal fun QuizScreen(
                 }
 
                 is QuizState.Quiz -> {
-                    BackHandler {
-                        viewModel.handleIntent(QuizIntent.ReturnToBeginning)
-                    }
                     Spacer(modifier = Modifier.height(40.dp))
                     (state as QuizState.Quiz).let {
                         Question(

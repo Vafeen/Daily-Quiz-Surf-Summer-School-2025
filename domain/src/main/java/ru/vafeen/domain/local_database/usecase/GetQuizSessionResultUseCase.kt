@@ -1,13 +1,11 @@
 package ru.vafeen.domain.local_database.usecase
 
-
 import ru.vafeen.domain.local_database.repository.QuizResultLocalRepository
 
 /**
- * Use case для сохранения результата сессии викторины в локальное хранилище.
+ * Use case для получения результата сессии викторины из локального хранилища.
  *
- * Обеспечивает сохранение сессии викторины на основе количества правильных ответов
- * и списка вопросов через [QuizResultLocalRepository].
+ * Использует [QuizResultLocalRepository] для загрузки данных сессии по идентификатору.
  *
  * @property quizResultLocalRepository Репозиторий для работы с результатами викторины в локальном хранилище.
  */
@@ -15,10 +13,10 @@ class GetQuizSessionResultUseCase(
     private val quizResultLocalRepository: QuizResultLocalRepository,
 ) {
     /**
-     * Сохраняет результат сессии викторины.
+     * Возвращает результат сессии викторины по её идентификатору.
      *
-     * @param countOfRightAnswers Количество правильно отвеченных вопросов.
-     * @param questions Список вопросов викторины.
+     * @param sessionId Идентификатор сессии викторины.
+     * @return Результат сессии викторины или null, если данных нет.
      */
     suspend operator fun invoke(sessionId: Long) =
         quizResultLocalRepository.getSessionById(sessionId)
