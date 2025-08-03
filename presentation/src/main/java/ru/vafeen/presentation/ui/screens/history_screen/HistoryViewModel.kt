@@ -23,8 +23,10 @@ import ru.vafeen.presentation.navigation.SendRootIntent
 /**
  * ViewModel экрана истории сессий викторины.
  *
- * Отвечает за загрузку списка превью сессий, обновление состояния экрана и обработку пользовательских интентов.
+ * Отвечает за загрузку списка превью сессий, обновление состояния экрана
+ * и обработку пользовательских интентов.
  *
+ * @property sendRootIntent Функция для отправки навигационных интентов в корневой обработчик.
  * @property context Контекст приложения для доступа к ресурсам.
  * @property getAllSessionPreviewUseCase UseCase для получения всех превью сессий.
  */
@@ -36,12 +38,16 @@ internal class HistoryViewModel @AssistedInject constructor(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HistoryState())
+
+    /**
+     * Состояние экрана, содержащее список превью сессий.
+     */
     val state = _state.asStateFlow()
 
     /**
-     * Обработать интенты, пришедшие с UI.
+     * Обрабатывает интенты, поступающие от UI, и выполняет соответствующие действия.
      *
-     * @param intent Интент пользователя, описывающий действие.
+     * @param intent интент пользователя, описывающий действие.
      */
     fun handleIntent(intent: HistoryIntent) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -63,6 +69,11 @@ internal class HistoryViewModel @AssistedInject constructor(
         }
     }
 
+    /**
+     * Инициирует навигацию к экрану с результатами конкретной сессии викторины.
+     *
+     * @param sessionId уникальный идентификатор сессии викторины
+     */
     private fun navigateToSession(sessionId: Long) =
         sendRootIntent(
             NavRootIntent.AddToBackStack(Screen.QuizSessionResult(sessionId = sessionId))
@@ -74,8 +85,17 @@ internal class HistoryViewModel @AssistedInject constructor(
      */
     private fun startQuiz() = sendRootIntent(NavRootIntent.StartTheQuiz)
 
+    /**
+     * Фабрика для создания экземпляров [HistoryViewModel] с необходимыми параметрами.
+     */
     @AssistedFactory
     interface Factory {
+        /**
+         * Создает экземпляр [HistoryViewModel].
+         *
+         * @param sendRootIntent функция для отправки навигационных интентов
+         * @return новый экземпляр [HistoryViewModel]
+         */
         fun create(sendRootIntent: SendRootIntent): HistoryViewModel
     }
 }
